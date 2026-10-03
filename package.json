@@ -4,17 +4,14 @@
   "description": "Comparador de Rendimento: Ações da B3 vs Taxa Selic",
   "type": "module",
   "scripts": {
-    "dev": "node server.mjs",
-    "start": "node server.mjs"
+    "dev": "node local-server.mjs"
   },
   "keywords": [
     "selic",
     "b3",
     "investimentos",
     "acoes",
-    "comparador",
-    "finance",
-    "brazil"
+    "comparador"
   ],
   "author": "",
   "license": "MIT"

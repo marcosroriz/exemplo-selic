@@ -173,7 +173,7 @@
       const res = await fetch(`/api/stock?ticker=${encodeURIComponent(ticker)}`);
       if (res.ok) {
         const data = await res.json();
-        if (data && data.history && data.history.length > 0) {
+        if (data && !data.error && data.history && data.history.length > 0) {
           DOM.chartLoading.classList.remove('active');
           return data;
         }

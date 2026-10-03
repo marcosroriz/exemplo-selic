@@ -1,4 +1,4 @@
-// Vercel Serverless Function to fetch stock data from Yahoo Finance
+// Vercel Serverless Function to fetch stock data from Yahoo Finance with fallback
 export default async function handler(req, res) {
   // CORS Headers
   res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -13,11 +13,19 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  let ticker = (req.query.ticker || req.query.symbol || 'PETR4').trim().toUpperCase();
-  ticker = ticker.replace('.SA', '');
-  const yahooSymbol = `${ticker}.SA`;
-
   try {
+    // Parse query params safely
+    let ticker = 'PETR4';
+    if (req.query && (req.query.ticker || req.query.symbol)) {
+      ticker = req.query.ticker || req.query.symbol;
+    } else if (req.url && req.url.includes('?')) {
+      const searchParams = new URL(req.url, 'http://localhost').searchParams;
+      ticker = searchParams.get('ticker') || searchParams.get('symbol') || 'PETR4';
+    }
+
+    ticker = String(ticker).trim().toUpperCase().replace('.SA', '');
+    const yahooSymbol = `${ticker}.SA`;
+
     const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yahooSymbol)}?range=10y&interval=1mo`;
     const response = await fetch(url, {
       headers: {
@@ -26,19 +34,21 @@ export default async function handler(req, res) {
     });
 
     if (!response.ok) {
-      return res.status(response.status).json({
+      return res.status(200).json({
+        symbol: ticker,
         error: true,
-        message: `Falha ao buscar ticker ${ticker} no Yahoo Finance (${response.status})`
+        message: `Status ${response.status} ao consultar provedor externo.`
       });
     }
 
     const data = await response.json();
     const result = data.chart?.result?.[0];
 
-    if (!result) {
-      return res.status(404).json({
+    if (!result || !result.timestamp) {
+      return res.status(200).json({
+        symbol: ticker,
         error: true,
-        message: `Ticker ${ticker} não encontrado ou sem dados históricos.`
+        message: `Nenhum dado retornado para ${ticker}.`
       });
     }
 
@@ -77,9 +87,10 @@ export default async function handler(req, res) {
       history: history
     });
   } catch (error) {
-    return res.status(500).json({
+    console.error('API Error:', error);
+    return res.status(200).json({
       error: true,
-      message: error.message || 'Erro interno ao consultar dados da ação.'
+      message: error.message || 'Erro ao processar cotação'
     });
   }
 }
