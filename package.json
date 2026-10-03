@@ -1,0 +1,21 @@
+{
+  "name": "exemplo-selic",
+  "version": "1.0.0",
+  "description": "Comparador de Rendimento: Ações da B3 vs Taxa Selic",
+  "type": "module",
+  "scripts": {
+    "dev": "node server.mjs",
+    "start": "node server.mjs"
+  },
+  "keywords": [
+    "selic",
+    "b3",
+    "investimentos",
+    "acoes",
+    "comparador",
+    "finance",
+    "brazil"
+  ],
+  "author": "",
+  "license": "MIT"
+}
